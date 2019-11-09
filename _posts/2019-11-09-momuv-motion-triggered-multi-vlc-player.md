@@ -25,6 +25,8 @@ is the URI to the IP camera. Try 0 for a webcam
 
 Read more about the usage on the [project page](https://github.com/djlancelot/momuv).
 
+It is extremely easy to use [pyinstaller](https://www.pyinstaller.org/) to create an executable bundle for MoMuV. Just run `pyinstaller players.py` and the executable will be added to the `dist` folder. 
+
 ## Why was MoMuV made?
 When we go to Universal Studios, I am always amazed how they bring practical movie tricks to life at their entertainment center. Although it looks really cool at the theme park, I believe that these tricks can be executed at home too with a help of a small video projector and a computer with a webcam. 
 
