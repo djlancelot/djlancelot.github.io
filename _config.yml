@@ -14,16 +14,16 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 title: László Velinszky's blog
-authot: László Velinszky
+author: László Velinszky
 minima:
   social_links:
     linkedin: velinszky
     youtube_channel: UCDtAn8Nz5ypfacm2kh-sDyA
     github:  djlancelot
 description: >- # this means to ignore newlines until "baseurl:"
-  Website of László Velinszky, the software engineer, data scientist, actor, narrator, deejay, video guy, sound engineer, loving husband and father.
-  This site tries to summarize my interests or the most interesting projects I've been involved with. It can touch any of
-  the distant topics from above.
+  Website of László Velinszky, the software engineer, data scientist, sound engineer, video guy, deejay,
+  narrator, actor, loving husband and father. This site tries to summarize my interests or the most
+  interesting projects I've been involved with.
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
 
