@@ -36,4 +36,7 @@ The generalised algorithm introduces two new input parameters to the algorithm:
 - a weight function.
 
 The calculation of the first row and first column of the $D$ matrix is really important, because during the dynamic programming algorithm the rest of the values depend on it.
-In the original Levenshtein distance, the calculation 
+In the original Levenshtein distance algorithm the next cell is greater than the previous value by a step cost. This step cost is always 1 if modifications are needed, 0 otherwise.
+The proposed algorithm changes on that behaviour and instead of 1, a cost defined by a weight function is added to the previous value. 
+After the initialization of the first column and row the the cost for each step in between will be the mean of the results of the weight function at the respective row and column.
+This calculated cost will be added to the 
