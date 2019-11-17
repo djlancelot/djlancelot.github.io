@@ -35,8 +35,41 @@ The generalised algorithm introduces two new input parameters to the algorithm:
 - an initial value
 - a weight function.
 
-The calculation of the first row and first column of the $D$ matrix is really important, because during the dynamic programming algorithm the rest of the values depend on it.
-In the original Levenshtein distance algorithm the next cell is greater than the previous value by a step cost. This step cost is always 1 if modifications are needed, 0 otherwise.
-The proposed algorithm changes on that behaviour and instead of 1, a cost defined by a weight function is added to the previous value. 
-After the initialization of the first column and row the the cost for each step in between will be the mean of the results of the weight function at the respective row and column.
-This calculated cost will be added to the 
+Based on these two parameters two weight vectors are created ( $v_{m}$ and $w_{n}$ ) with length respective to the length of the two strings.
+
+
+$w_0 = w_{init}$
+
+$w_{i \in n} = f_w(w_{i-1})$
+
+In the original algorithm the cost of each modification is 1. In the proposed general algorithm the cost of each step is the mean of the weights at the observed position.
+
+$c_{ij} = { \frac {v_{i} + w_{j}}{2}}$
+ 
+The first column and first row shows the cost of changing the string represented by the row or the column into a 0 length string (no string at all).
+This is a cumulative sum of the step cost over the length of the string. 
+As this case covers the possible outcome that one of the strings are missing the mean is also calculated using one string's weight vector only.
+
+$d_{0,0}= 0$
+
+$d_{i,0} = v_i + d_{i-1, 0}  \quad i \in (1,m)$
+
+$d_{0, j} = w_j + d_{0, j-1} \quad j \in (1,n)$ 
+
+Given the first row, column and the cost function the calculation of the rest of the matrix is similar to the original algorithm.
+In case no change is necessary the cost will be zero, otherwise the cost will be calculated as shown above.
+The same cost is used for deletion or insertion as the distance between the surrounding cells is de defined as equal, just like in the original algorithm.
+
+If the weight function is monotone decreasing then the weights of the last characters would be less than the ones in the beginning.
+Such function can be the $f_w(x) = 0.9 \cdot x$.
+
+If the weight function is monotone increasing then the weights of the first charactes would be the least.
+Such function would be the $f_w(x) = x + 1$. 
+
+This algorithm has a limitation that the weight of the last characters can't be set to decrease by making addition or subtraction operations, 
+as at some point the weight would become negative. 
+
+## Inverse Weighted Levenshtein distance
+
+As the original purpose of the modification is to decreas the weights for the last characters a slight modification is made to the algorithm.
+ 
