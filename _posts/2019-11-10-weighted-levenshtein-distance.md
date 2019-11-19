@@ -63,7 +63,7 @@ The same cost is used for deletion or insertion as the distance between the surr
 If the weight function is monotone decreasing then the weights of the last characters would be less than the ones in the beginning.
 Such function can be the $f_w(x) = 0.9 \cdot x$.
 
-If the weight function is monotone increasing then the weights of the first charactes would be the least.
+If the weight function is monotone increasing then the weights of the first characters would be the least.
 Such function would be the $f_w(x) = x + 1$. 
 
 This algorithm has a limitation that the weight of the last characters can't be set to decrease by making addition or subtraction operations, 
@@ -71,5 +71,18 @@ as at some point the weight would become negative.
 
 ## Inverse Weighted Levenshtein distance
 
-As the original purpose of the modification is to decreas the weights for the last characters a slight modification is made to the algorithm.
- 
+As the original purpose of the modification is to decrease the weights for the last characters a slight modification was made to the algorithm.
+Although the purpose can be fulfilled by having a monotone decreasing weight function which does not fall below 0, the general algorithm can 
+be easily modified to support the addition operation by taking the inverse of the calculated costs.
+This change  enables smoother weight functions. The weight vectors are calculated the same way as before, 
+the calculation of the $D$ matrix is changed as the following: 
+
+$d_{0,0}= 0$
+
+$d_{i,0} = {\frac {1}{v_i} } + d_{i-1, 0}  \quad i \in (1,m)$
+
+$d_{0, j} = {\frac {1}{w_j} } + d_{0, j-1} \quad j \in (1,n)$
+
+Instead of the mean, the inverse of the mean is used for calculating the step cost.
+
+$c_{ij} = { \frac {2}{v_{i} + w_{j}}}$ 
