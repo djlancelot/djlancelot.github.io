@@ -31,28 +31,41 @@ In this article 2 algorithms will be shown to overcome this problem and add diff
 
 ## Weighted Generalised Levenshtein distance
 
-The generalised algorithm introduces two new input parameters to the algorithm: 
+The generalised algorithm introduces three new input parameters to the algorithm: 
 - an initial value
-- a weight function.
+- a weight function
+- a decision function
 
-Based on these two parameters two weight vectors are created ( $v_{m}$ and $w_{n}$ ) with length respective to the length of the two strings.
-
+Based on the first two parameters a weight vector is created ( $w_{n}$ ) with the size of the longer string.
+This weight vector will be shared with the other string.
 
 $w_0 = w_{init}$
 
 $w_{i \in n} = f_w(w_{i-1})$
 
-In the original algorithm the cost of each modification is 1. In the proposed general algorithm the cost of each step is the mean of the weights at the observed position.
+In the original algorithm the cost of each modification is 1. In the proposed algorithm instead of the constant value, 
+one of the weights are used at the position.
+- The minimum of the two weights should be picked in case of a monotone decreasing weight function
+- The maximum of the two weights should be picked in case of a monotone increasing weight function  
 
-$c_{ij} = { \frac {v_{i} + w_{j}}{2}}$
- 
+$c_{ij} = 
+\cases{
+\text{min} ( w_{i} , w_{j} ) & $f_w \text{ monotone decreasing}$ \cr
+\text{max} ( w_{i} , w_{j} ) & $f_w \text{ monotone increasing}$
+} 
+$
+
+Using the above decision functions will make sure that the algorithm can be executed in a greedy fashion, 
+the cost of making one change at two positions will be the sum of the cost of a change at one of the positions and 
+the cost of the change for the other position.
+
 The first column and first row shows the cost of changing the string represented by the row or the column into a 0 length string (no string at all).
 This is a cumulative sum of the step cost over the length of the string. 
-As this case covers the possible outcome that one of the strings are missing the mean is also calculated using one string's weight vector only.
+As this case covers the possible outcome that one of the strings are missing the weight of the existing string is used instead of the minimum.
 
 $d_{0,0}= 0$
 
-$d_{i,0} = v_i + d_{i-1, 0}  \quad i \in (1,m)$
+$d_{i,0} = w_i + d_{i-1, 0}  \quad i \in (1,m)$
 
 $d_{0, j} = w_j + d_{0, j-1} \quad j \in (1,n)$ 
 
@@ -73,16 +86,22 @@ as at some point the weight would become negative.
 
 As the original purpose of the modification is to decrease the weights for the last characters a slight modification was made to the algorithm.
 Although the purpose can be fulfilled by having a monotone decreasing weight function which does not fall below 0, the general algorithm can 
-be easily modified to support the addition operation by taking the inverse of the calculated costs.
+be easily modified to support the addition operation by taking the inverse of the weights at a given position.
+The only condition is that the weight vector should not equal to zero.
 This change  enables smoother weight functions. The weight vectors are calculated the same way as before, 
 the calculation of the $D$ matrix is changed as the following: 
 
 $d_{0,0}= 0$
 
-$d_{i,0} = {\frac {1}{v_i} } + d_{i-1, 0}  \quad i \in (1,m)$
+$d_{i,0} = {\frac {1}{w_i} } + d_{i-1, 0}  \quad i \in (1,m)$
 
 $d_{0, j} = {\frac {1}{w_j} } + d_{0, j-1} \quad j \in (1,n)$
 
-Instead of the mean, the inverse of the mean is used for calculating the step cost.
+The decision functions are swapped for this case.
 
-$c_{ij} = { \frac {2}{v_{i} + w_{j}}}$ 
+$c_{ij} = 
+\cases{
+\text{min} ( w_{i} , w_{j} ) & $f_w \text{ monotone increasing}$ \cr
+\text{max} ( w_{i} , w_{j} ) & $f_w \text{ monotone decreasing}$
+} 
+$
