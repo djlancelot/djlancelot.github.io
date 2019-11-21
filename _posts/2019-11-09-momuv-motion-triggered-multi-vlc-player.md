@@ -30,7 +30,7 @@ It is extremely easy to use [pyinstaller](https://www.pyinstaller.org/) to creat
 ## Why was MoMuV made?
 When we go to Universal Studios, I am always amazed how they bring practical movie tricks to life at their entertainment center. Although it looks really cool at the theme park, I believe that these tricks can be executed at home too with a help of a small video projector and a computer with a webcam. 
 
-For Halloween, I decided to create a small animation and needed a tool to play the animation when trick or treaters arrive at our place. The video was projected on the window against an old, white flat sheet (shower linen works too). I needed a tool to play the animation automatically when motion is detected. Initially I split the animation into two parts to use a TV as a primary screen and use the projector to display additional content so I built this requirement into the application.
+For Halloween, I decided to create a small animation and needed a tool to play the animation when trick or treaters arrive at our place. The video was projected on the window against an plain, white flat sheet (shower linen works too). I needed a tool to play the animation automatically when motion is detected. Initially I split the animation into two parts to use a TV as a primary screen and use the projector to display additional content so I built this requirement into the application.
 Unfortunatelly, when doing my research, I couldn't find any freely available tools to achieve my goals, so I started to think about other ways solutions.
 
 ## How does MoMuV work?
