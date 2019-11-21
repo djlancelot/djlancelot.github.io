@@ -61,13 +61,13 @@ $w_{i \in n} = f_w(w_{i-1})$
 
 In the original algorithm the cost of each modification is 1. In the proposed algorithm instead of the constant value, 
 one of the weights are used at the position.
-- The minimum of the two weights should be picked in case of a monotone decreasing weight function
-- The maximum of the two weights should be picked in case of a monotone increasing weight function  
+- The minimum of the two weights should be picked in case of a monotonically decreasing weight function
+- The maximum of the two weights should be picked in case of a monotonically increasing weight function  
 
 $c_{ij} = 
 \cases{
-\text{min} ( w_{i} , w_{j} ) & $f_w \text{ monotone decreasing}$ \cr
-\text{max} ( w_{i} , w_{j} ) & $f_w \text{ monotone increasing}$
+\text{min} ( w_{i} , w_{j} ) & $f_w \text{ monotonically decreasing}$ \cr
+\text{max} ( w_{i} , w_{j} ) & $f_w \text{ monotonically increasing}$
 } 
 $
 
@@ -89,10 +89,10 @@ Given the first row, column and the cost function the calculation of the rest of
 In case no change is necessary the cost will be zero, otherwise the cost will be calculated as shown above.
 The same cost is used for deletion or insertion as the distance between the surrounding cells is de defined as equal, just like in the original algorithm.
 
-If the weight function is monotone decreasing then the weights of the last characters would be less than the ones in the beginning.
+If the weight function is monotonically decreasing then the weights of the last characters would be less than the ones in the beginning.
 Such function can be the $f_w(x) = 0.9 \cdot x$.
 
-If the weight function is monotone increasing then the weights of the first characters would be the least.
+If the weight function is monotonically increasing then the weights of the first characters would be the least.
 Such function would be the $f_w(x) = x + 1$. 
 
 Mixing up the decision function or using a function that changes it's direction would
@@ -141,7 +141,7 @@ def wlevenshtein(s1, s2, normalize=False, w_init=1, w_func=lambda x: x, d_func=m
 ## Inverse Weighted Levenshtein distance
 
 As the original purpose of the modification is to decrease the weights for the last characters a slight modification was made to the algorithm.
-Although the purpose can be fulfilled by having a monotone decreasing weight function which does not fall below 0, the general algorithm can 
+Although the purpose can be fulfilled by having a monotonically decreasing weight function which does not fall below 0, the general algorithm can 
 be easily modified to support the addition operation by taking the inverse of the weights at a given position.
 The only condition is that the weight vector should not equal to zero.
 This change  enables smoother weight functions. The weight vectors are calculated the same way as before, 
@@ -157,8 +157,8 @@ The decision functions are swapped for this case.
 
 $c_{ij} = 
 \cases{
-\text{min} ( w_{i} , w_{j} ) & $f_w \text{ monotone increasing}$ \cr
-\text{max} ( w_{i} , w_{j} ) & $f_w \text{ monotone decreasing}$
+\text{min} ( w_{i} , w_{j} ) & $f_w \text{ monotonically increasing}$ \cr
+\text{max} ( w_{i} , w_{j} ) & $f_w \text{ monotonically decreasing}$
 } 
 $
 
