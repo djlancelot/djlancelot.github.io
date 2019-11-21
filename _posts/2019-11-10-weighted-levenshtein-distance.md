@@ -4,16 +4,16 @@ title:  "Weighted Levenshtein distance"
 date:   2019-11-10 23:43:06 -0800
 categories: datascience 
 ---
-In this post I'll introduce a two new variants for the Damerau–Levenshtein distance calculation &mdash; specifically for an extended version of the Wagner–Fischer algorithm &mdash; to dynamically change the cost of the edit step based on the position of the changes.
+In this post I'll introduce a two new variants for the [Damerau–Levenshtein distance](https://en.wikipedia.org/wiki/Damerau%E2%80%93Levenshtein_distance) calculation &mdash; specifically for an extended version of the Wagner–Fischer algorithm &mdash; to dynamically change the cost of the edit step based on the position of the changes.
 
 ## Summary of the Damerau-Levenshtein distance
 
-The Wagner–Fischer algorithm calculates the edit disance between two strings. It is a dynamic programming algorithm that uses an m by n matrix to calculate the edit distance in between two words $w_{1}$ and $w_{2}$. For the original Levenshtein distance there are 3 kinds of operations available for two characters in the string:
+The [Wagner–Fischer algorithm](https://en.wikipedia.org/wiki/Wagner%E2%80%93Fischer_algorithm) calculates the edit disance between two strings. It is a dynamic programming algorithm that uses an m by n matrix to calculate the edit distance in between two words $w_{1}$ and $w_{2}$. For the original Levenshtein distance there are 3 kinds of operations available for two characters in the string:
 - **Deletion** (Transformation from main to man by removing the *i* character)
 - **Insertion** (Transformation from man to main by inserting the *i* character) 
 - **Sustitution** (Transformation from main to gain by modifying the leading *m* character to *g*)
 
-The Damerau–Levenshtein variant introduces one more operation, which is the **transposition** of the characters. The changes presented in this post were implemented on the Damerau–Levenshtein variant, but can be implemented for the original Levenshtein distance metric by removing the additional operation from the code.
+The Damerau–Levenshtein variant introduces one more operation, which is the **transposition** of the characters. The changes presented in this post were implemented on the Damerau–Levenshtein variant, but can be implemented for the original [Levenshtein distance](https://en.wikipedia.org/wiki/Levenshtein_distance) metric by removing the additional operation from the code.
 
 The Damerau–Levenshtein distance provides the edit distance between two strings based on the 4 operations mentioned above. For example the edit distance between the words *Martha* and *Marha* is 1, because with the removal of the *t* character (or the addition of it) the other string can be generated. The edit distance for *Main* and *Gain* is also 1 as the *M* can be substituted by a *G* or vice versa to generate one word from the other. This metric is used for correcting typing errors in texts. The typed word is matched against a vocabulary and the word with the lowest Levenshtein distance is suggested as a correction for the word.
 
@@ -26,8 +26,24 @@ $norm =
 }
 $
 
-In some use cases, like similar company name detection the end of the string is less important than the beginning. Especially in company names, some article mentions use the business type abbreviation or other suffixes with the name while others omit the abbreviation or write alternatives. For example variants like *Lucky Ltd*, *Lucky Limited* or *Lucky* might still refer to the same company. 
-In this article 2 algorithms will be shown to overcome this problem and add different weights for the changes towards the end of the strings than the beginning of the string.
+In some use cases, like similar company name detection the end of the string is less important than the beginning. 
+Especially in company names, some article mentions use the business type abbreviation or other suffixes with the name while others omit the abbreviation or write alternatives. 
+For example variants like *Lucky Ltd*, *Lucky Limited* or *Lucky* might still refer to the same company. 
+Other possible use-cases where varying weight would be advantageous are street addresses and news titles.
+In street addresses using the abbreviation or the full street type is less important than the house number and the street name itself.
+Some news sources make minor changes to the original article and re-publish them on their own site. 
+Using a weighted distance can be beneficial when trying to deduplicate them.
+
+  
+In this article 2 algorithms will be shown to solve this problem and add different weights depending on the position of the changed characters.
+
+## Jaro-Winkler distance, the alternative
+
+The [Jaro-Winkler distance](https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance) can be used for cases when the beginning of the string has higher importance then the end. 
+The algorithm is based on the Jaro similarity and can boost the similarity based on a matching prefix of up to 4 characters.
+If there is no matching prefix or the matching prefix is longer than 4 characters, 
+the distance will stay the same as the Jaro similarity, which does not use any weights based on the position.
+The proposed algorithms overcome these issues too.
 
 ## Weighted Generalised Levenshtein distance
 
@@ -79,8 +95,48 @@ Such function can be the $f_w(x) = 0.9 \cdot x$.
 If the weight function is monotone increasing then the weights of the first characters would be the least.
 Such function would be the $f_w(x) = x + 1$. 
 
+Mixing up the decision function or using a function that changes it's direction would
+cause problems, like 
+- incorrect normalization: values other than the first row or first column can become the maximum of the matrix
+- inconsistent distances: the disance from "the" -> "ehe" and "the" -> "tre", would not equal to "the" -> "ere".
+
 This algorithm has a limitation that the weight of the last characters can't be set to decrease by making addition or subtraction operations, 
 as at some point the weight would become negative. 
+
+A sample implementation of the algorithm is the following:
+
+```python
+import numpy as np
+def wlevenshtein(s1, s2, normalize=False, w_init=1, w_func=lambda x: x, d_func=min):    
+    l1, l2 = len(s1)+1,len(s2)+1
+    ml = max(l1, l2)
+    wv = np.zeros(ml)
+    w = w_init
+    for i in range(1,ml):
+        wv[i] = w
+        w = w_func(w)
+    d = np.zeros((l1, l2))
+    cost = 0
+    norm = 1.0
+    for i in range(1,l1):
+        d[i, 0] = (wv[i]) + d[i-1, 0]
+    for j in range(1,l2):
+        d[0, j] = (wv[j]) + d[0, j-1]
+    for i in range(1,l1):
+        for j in range(1,l2):
+            step_cost = d_func(wv[i],wv[j])
+            cost = 0 if s1[i-1]==s2[j-1] else step_cost
+            d[i,j]= min(
+                d[i-1, j]+step_cost,
+                d[i, j-1] + step_cost,
+                d[i-1, j-1] + cost
+            )
+            if i > 1 and j > 1 and s1[i-1] == s2[j-2] and s1[i-2] == s2[j-1]:
+                d[i, j]=min(d[i, j], d[i-2, j-2] + cost)
+    if normalize:
+        norm = d[l1 - 1, 0] if l1 > l2 else d[0, l2 - 1]
+    return d[l1-1, l2-1]/norm
+```
 
 ## Inverse Weighted Levenshtein distance
 
@@ -105,3 +161,49 @@ $c_{ij} =
 \text{max} ( w_{i} , w_{j} ) & $f_w \text{ monotone decreasing}$
 } 
 $
+
+Choosing the right decision function is equally important in this case too.
+
+A sample implementation of the algorithm is the following:
+
+```python
+import numpy as np
+def iwlevenshtein(s1, s2, normalize=False, w_init=1, w_func=lambda x: x, d_func=min):
+    l1, l2 = len(s1)+1,len(s2)+1
+    ml = max(l1,l2)
+    wv = np.zeros(ml)
+    w = w_init
+    for i in range(1,ml):
+        wv[i] = w
+        w = w_func(w)
+    d = np.zeros((l1, l2))
+    cost = 0
+    norm = 1.0
+    for i in range(1, l1):
+        d[i, 0]= (1/wv[i]) + d[i-1, 0]
+    for j in range(1, l2):
+        d[0, j]= (1/wv[j]) + d[0, j-1]
+    for i in range(1, l1):
+        for j in range(1, l2):
+            step_cost = d_func(1/wv[i], 1/wv[j])
+            cost = 0 if s1[i-1]==s2[j-1] else step_cost
+            d[i, j]= min(
+                d[i-1, j]+step_cost,
+                d[i, j-1] + step_cost,
+                d[i-1, j-1] + cost
+            )
+            if i > 1 and j > 1 and s1[i-1] == s2[j-2] and s1[i-2] == s2[j-1]:
+                d[i, j]= min(d[i, j], d[i-2, j-2] + cost)
+    if normalize:
+        norm = d[l1 - 1, 0] if l1 > l2 else d[0, l2 - 1]
+    return d[l1-1,l2-1]/norm
+```
+
+
+## Conclusion
+
+Using the previously introduced algorithms a two strings edit distance can be calculated in a way that the weight of each change 
+varies depending on the position of the changed characters. This can be useful for comparing company names, postal addresses or news titles 
+where a match at the start of the string is more important than the match at the end. 
+Unlike the Jaro-Winkler distance, this calculation does not need a matching prefix of the two strings.
+The inverse weighted distance is more convenient to use with decreasing weights.
