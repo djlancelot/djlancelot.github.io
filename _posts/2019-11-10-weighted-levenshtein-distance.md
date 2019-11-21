@@ -204,7 +204,7 @@ def iwlevenshtein(s1, s2, normalize=False, w_init=1, w_func=lambda x: x, d_func=
 
 ## Conclusion
 
-Using the previously introduced algorithms a two strings edit distance can be calculated in a way that the weight of each change 
+Using the previously introduced algorithms two strings edit distance can be calculated in a way that the weight of each change 
 varies depending on the position of the changed characters. This can be useful for comparing company names, postal addresses or news titles 
 where a match at the start of the string is more important than the match at the end. 
 Unlike the Jaro-Winkler distance, this calculation does not need a matching prefix of the two strings.
