@@ -4,18 +4,20 @@ title:  "Weighted Levenshtein distance"
 date:   2019-11-10 23:43:06 -0800
 categories: datascience 
 ---
-In this post I'll introduce a two new variants for the [Damerau–Levenshtein distance](https://en.wikipedia.org/wiki/Damerau%E2%80%93Levenshtein_distance) calculation &mdash; specifically for an extended version of the Wagner–Fischer algorithm &mdash; to dynamically change the cost of the edit step based on the position of the changes.
+In this post, I'll introduce two new variants for the [Damerau–Levenshtein distance](https://en.wikipedia.org/wiki/Damerau%E2%80%93Levenshtein_distance) calculation &mdash; specifically for an extended version of the Wagner–Fischer algorithm &mdash; to dynamically change the cost of the edit step based on the position of the changes.
 
 ## Summary of the Damerau-Levenshtein distance
 
-The [Wagner–Fischer algorithm](https://en.wikipedia.org/wiki/Wagner%E2%80%93Fischer_algorithm) calculates the edit disance between two strings. It is a dynamic programming algorithm that uses an m by n matrix to calculate the edit distance in between two words $w_{1}$ and $w_{2}$. For the original Levenshtein distance there are 3 kinds of operations available for two characters in the string:
+The [Wagner–Fischer algorithm](https://en.wikipedia.org/wiki/Wagner%E2%80%93Fischer_algorithm) calculates the edit distance between two strings. It is a dynamic programming algorithm that uses an m by n matrix to calculate the edit distance between two words $w_{1}$ and $w_{2}$. For the original Levenshtein distance there are 3 kinds of operations available for two characters in the string:
 - **Deletion** (Transformation from main to man by removing the *i* character)
 - **Insertion** (Transformation from man to main by inserting the *i* character) 
-- **Sustitution** (Transformation from main to gain by modifying the leading *m* character to *g*)
+- **Substitution** (Transformation from main to gain by modifying the leading *m* character to *g*)
 
-The Damerau–Levenshtein variant introduces one more operation, which is the **transposition** of the characters. The changes presented in this post were implemented on the Damerau–Levenshtein variant, but can be implemented for the original [Levenshtein distance](https://en.wikipedia.org/wiki/Levenshtein_distance) metric by removing the additional operation from the code.
+The Damerau–Levenshtein variant introduces one more operation, which is the **transposition** of the characters. 
+The changes presented in this post were implemented on the Damerau–Levenshtein variant, but can be implemented for the original [Levenshtein distance](https://en.wikipedia.org/wiki/Levenshtein_distance) metric by removing the additional operation from the code.
 
-The Damerau–Levenshtein distance provides the edit distance between two strings based on the 4 operations mentioned above. For example the edit distance between the words *Martha* and *Marha* is 1, because with the removal of the *t* character (or the addition of it) the other string can be generated. The edit distance for *Main* and *Gain* is also 1 as the *M* can be substituted by a *G* or vice versa to generate one word from the other. This metric is used for correcting typing errors in texts. The typed word is matched against a vocabulary and the word with the lowest Levenshtein distance is suggested as a correction for the word.
+The Damerau–Levenshtein distance provides the edit distance between two strings based on the 4 operations mentioned above. 
+For example, the edit distance between the words *Martha* and *Marha* is 1, because with the removal of the *t* character (or the addition of it) the other string can be generated. The edit distance for *Main* and *Gain* is also 1 as the *M* can be substituted by a *G* or vice versa to generate one word from the other. This metric is used for correcting typing errors in texts. The typed word is matched against a vocabulary and the word with the lowest Levenshtein distance is suggested as a correction for the word.
 
 The distance can be normalized between 0 and 1 by dividing the distance by the length of the longest character. In the $D$ m by n matrix determined by the Wagner-Fischer algorithm this value is 
 
@@ -26,8 +28,8 @@ $norm =
 }
 $
 
-In some use cases, like similar company name detection the end of the string is less important than the beginning. 
-Especially in company names, some article mentions use the business type abbreviation or other suffixes with the name while others omit the abbreviation or write alternatives. 
+In some use cases, like similar company name detection, the end of the string is less important than the beginning. 
+Especially in company names, some article mentions using the business type abbreviation or other suffixes with the name while others omit the abbreviation or write alternatives. 
 For example variants like *Lucky Ltd*, *Lucky Limited* or *Lucky* might still refer to the same company. 
 Other possible use-cases where varying weight would be advantageous are street addresses and news titles.
 In street addresses using the abbreviation or the full street type is less important than the house number and the street name itself.
@@ -39,7 +41,7 @@ In this article 2 algorithms will be shown to solve this problem and add differe
 
 ## Jaro-Winkler distance, the alternative
 
-The [Jaro-Winkler distance](https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance) can be used for cases when the beginning of the string has higher importance then the end. 
+The [Jaro-Winkler distance](https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance) can be used for cases when the beginning of the string has higher importance than the end. 
 The algorithm is based on the Jaro similarity and can boost the similarity based on a matching prefix of up to 4 characters.
 If there is no matching prefix or the matching prefix is longer than 4 characters, 
 the distance will stay the same as the Jaro similarity, which does not use any weights based on the position.
@@ -47,7 +49,7 @@ The proposed algorithms overcome these issues too.
 
 ## Weighted Generalised Levenshtein distance
 
-The generalised algorithm introduces three new input parameters to the algorithm: 
+The generalized algorithm introduces three new input parameters to the algorithm: 
 - an initial value
 - a weight function
 - a decision function
@@ -59,8 +61,8 @@ $w_0 = w_{init}$
 
 $w_{i \in n} = f_w(w_{i-1})$
 
-In the original algorithm the cost of each modification is 1. In the proposed algorithm instead of the constant value, 
-one of the weights are used at the position.
+In the original algorithm, the cost of each modification is 1. In the proposed algorithm instead of the constant value, 
+one of the weights is used at the position.
 - The minimum of the two weights should be picked in case of a monotonically decreasing weight function
 - The maximum of the two weights should be picked in case of a monotonically increasing weight function  
 
@@ -75,9 +77,9 @@ Using the above decision functions will make sure that the algorithm can be exec
 the cost of making one change at two positions will be the sum of the cost of a change at one of the positions and 
 the cost of the change for the other position.
 
-The first column and first row shows the cost of changing the string represented by the row or the column into a 0 length string (no string at all).
+The first column and first row show the cost of changing the string represented by the row or the column into a 0 length string (no string at all).
 This is a cumulative sum of the step cost over the length of the string. 
-As this case covers the possible outcome that one of the strings are missing the weight of the existing string is used instead of the minimum.
+As this case covers the possible outcome that one of the strings is missing the weight of the existing string is used instead of the minimum.
 
 $d_{0,0}= 0$
 
@@ -86,7 +88,7 @@ $d_{i,0} = w_i + d_{i-1, 0}  \quad i \in (1,m)$
 $d_{0, j} = w_j + d_{0, j-1} \quad j \in (1,n)$ 
 
 Given the first row, column and the cost function the calculation of the rest of the matrix is similar to the original algorithm.
-In case no change is necessary the cost will be zero, otherwise the cost will be calculated as shown above.
+In case no change is necessary the cost will be zero, otherwise, the cost will be calculated as shown above.
 The same cost is used for deletion or insertion as the distance between the surrounding cells is de defined as equal, just like in the original algorithm.
 
 If the weight function is monotonically decreasing then the weights of the last characters would be less than the ones in the beginning.
@@ -95,10 +97,10 @@ Such function can be the $f_w(x) = 0.9 \cdot x$.
 If the weight function is monotonically increasing then the weights of the first characters would be the least.
 Such function would be the $f_w(x) = x + 1$. 
 
-Mixing up the decision function or using a function that changes it's direction would
+Mixing up the decision function or using a function that changes its direction would
 cause problems, like 
 - incorrect normalization: values other than the first row or first column can become the maximum of the matrix
-- inconsistent distances: the disance from "the" -> "ehe" and "the" -> "tre", would not equal to "the" -> "ere".
+- inconsistent distances: the distance from "the" -> "ehe" and "the" -> "tre", would not equal to "the" -> "ere".
 
 This algorithm has a limitation that the weight of the last characters can't be set to decrease by making addition or subtraction operations, 
 as at some point the weight would become negative. 
