@@ -1,0 +1,24 @@
+.site-header {
+    min-height: 700px;
+    position: relative;
+    background-image: url("/images/tree-back.jpg");
+    background-attachment: fixed;
+    background-size: cover;
+    border-top: 5px solid rgb(66, 66, 66);
+    border-bottom: 1px solid rgb(232, 232, 232);
+    background-position: center center;
+}
+
+.site-header .wrapper {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.site-title,
+.site-title:visited {
+    color: rgb(255, 255, 255);
+}
+
+.site-nav .page-link {
+    color: rgb(255, 255, 255);
+    line-height: 1.5;
+}
